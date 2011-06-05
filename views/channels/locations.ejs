@@ -1,0 +1,7 @@
+<h2>Live updates for <%= location %></h2>
+<p class="help">Updates will appear here as soon as they are tagged on Instagram.</p>
+<ul class="append-live-data" data-subscription="channel:locations:<%= location %>">
+<% for(var i=0; i<media.length; i++) { %>
+  <li><img src="<%= media[i].images.standard_resolution.url %>" /></li>
+<% } %>
+</ul>

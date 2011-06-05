@@ -1,0 +1,61 @@
+<section id="what">
+  <h2>What</h2
+  <form action="/search/tags" method="post">
+    <fieldset>
+      <label for="cause" class="text">
+        <span>Topic or tag</span>
+        <input type="text" name="value" class="value" />
+      </label>
+    </fieldset>
+    <fieldset class="controls">
+      <input type="submit" value="Find" />
+    </fieldset>
+  </form>
+</section>
+
+<!-- END POINTS FOR LOCATION AND GEOGRAPHIES: 
+
+Location: channel/locations/4sqLocationID
+Geographies: channel/geographies/lat.lon
+
+-->
+
+<!-- test the supposed 'name' param on the instagram node lib,
+otherwise this is going to have to be a lat/lon thing, maybe, 
+for this demo, just use the browser's geolocate to get a lat-lon
+then suggest a list of nearby places.
+
+could use a geonode type thing to get a lat-lon from a keyword, 
+then show a list of nearby, then go to the end point... but...
+that's a lot of jumping around. (see geography below). Leave this
+sort of nonsense to anyone who implements the platform
+
+could enhance with a map drag/drop type thing -->
+
+<!-- run a keyword through geonode, then use resulting lat-lon to take
+you to /location/lat-lon/ 
+
+...also offer a simple manual lat-lon search -->
+<section id="where">
+  <h2>Where</h2
+  <form action="/search/locations" method="post">
+    
+    <fieldset class="controls">
+      <input type="submit" value="Find" />
+    </fieldset>
+  </form>
+</section>
+
+<!-- probably need to authenticate, then redirect to 
+authenicated-users-path/currently-authenticated-users-id/ -->
+
+<section id="who">
+  <h2>Who</h2>
+  <!-- if authed -->
+  <p><a href="">Add me to this list</a></p>
+  <!-- else, remove me link -->
+  <ul id="users">
+    <li><a href="/channel/users/username">Authenticated user</a></li>
+  </ul>
+</section>
+

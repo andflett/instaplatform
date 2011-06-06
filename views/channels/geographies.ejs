@@ -1,7 +1,8 @@
-<h2>Live updates for <%= lat %> <%= lon %></h2>
-<p class="help">Updates will appear here as soon as they are tagged on Instagram.</p>
-<ul class="append-live-data" data-subscription="channel:geographies:<%= lat %>">
+<h2>Live updates for <%= geography.geography_name %></h2>
+<p><a href="http://www.gorissen.info/Pierre/maps/googleMapLocation.php?lat=<%= geography.latitude %>&amp;lon=<%= geography.longitude %>&amp;setLatLon=Set">View location on a map</a></p>
+<p class="help">Updates will appear here as soon as they are posted on Instagram.</p>
+<ul class="append-live-data" data-subscription="channel:geographies:<%= geography.object_id %>">
 <% for(var i=0; i<media.length; i++) { %>
-  <li><img src="<%= media[i].images.standard_resolution.url %>" /></li>
+  <li><a href="<%= media[i].link %>"><img src="<%= media[i].images.standard_resolution.url %>" /></a></li>
 <% } %>
 </ul>

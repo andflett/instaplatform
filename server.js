@@ -4,7 +4,8 @@ var url = require('url'),
     crypto = require('crypto'),
     redis = require('redis'),
     subscriptions = require('./subscriptions'),
-    app = settings.app;
+    app = settings.app,
+    geo = require('geo');
 
 // Handshake to verify any new subscription requests.
 
@@ -15,19 +16,35 @@ app.get('/callbacks', function(request, response){
 // Receive authentication callbacks from Instagram
 
 app.get('/callbacks/oauth', function(request, response){
-  Instagram.oauth.ask_for_access_token({
+  helpers.instagram.oauth.ask_for_access_token({
     request: request,
     response: response,
-    redirect: '/channel/users/',
+    redirect: '/callbacks/confirmed',
     complete: function(params){
-      console.log(params);
-      // add full token to redis for use on the homepage and user specific pages
-      
-      // params['access_token']
-      // params['user']
+      // Add this user to our local cache.
+      // As this happens asyncronously, and instagram-node-lib has already
+      // sent an empty 200 header, the homepage may not display this user
+      // on first load, so we'll head over to a fake confirmation page instead
+      var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+      r.hexists('authenticated_users', params['user'].username,function(error,code) {
+        if(code=="0") {
+          // Bit messy, but we need to access users by username and id
+          // throughout the app, must be a better way to do this...
+          r.hset('authenticated_users', params['user'].username, JSON.stringify(params));
+          r.hset('authenticated_users_ids', params['user'].id, JSON.stringify(params));
+        }
+        r.quit();
+      });
     }
   });
 });
+
+// Annoying, but required for now, will attempt to fork
+// Instagram-node-lib to get around this
+
+app.get('/callbacks/confirmed',function(request,response){
+  response.render('confirmation');
+})
 
 // The POST callback for Instagram to call every time there's an update
 // to one of our subscriptions.
@@ -54,12 +71,10 @@ app.post('/callbacks', function(request, response){
     
     var update = updates[index];
   	
-    if(update['object'] == "tag") function process() { helpers.tags.processUpdate(update['object_id']); }
-    if(update['object'] == "geography") function process() { helpers.geographies.processUpdate(update['object_id']); }
-    if(update['object'] == "location") function process() { helpers.locations.processUpdate(update['object_id']); }
-    if(update['object'] == "user") function process() { helpers.users.processUpdate(update['object_id']); }
-    
-    setTimeout(process,2000);
+    if(update['object'] == "tag") setTimeout(function(){ helpers.tags.processUpdate(update['object_id']); } ,2000);
+    if(update['object'] == "geography") setTimeout(function(){ helpers.geographies.processUpdate(update['object_id']); } ,2000);
+    if(update['object'] == "location") setTimeout(function(){ helpers.locations.processUpdate(update['object_id']); } ,2000);
+    if(update['object'] == "user") setTimeout(function(){ helpers.users.processUpdate(update['object_id']); } ,2000);
     
   }
   
@@ -69,11 +84,18 @@ app.post('/callbacks', function(request, response){
 
 app.get('/', function(request, response) {
   
-  // List of authenticated users
-  authorization_url = Instagram.oauth.authorization_url();
-  // pull list of authenticated users from redis
+  // URL to allow users to authenticate and add themselves to the app
+  authorization_url = helpers.instagram.oauth.authorization_url({});
+  channel = 'home'
   
-  response.render('home');
+  // Pull a list of authenticated users from our local cache 
+  // then render the homepage
+  var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+  user_hash = r.hgetall('authenticated_users', function(error, user_hash){
+    response.render('home', {locals: {authenticated_users:user_hash}});
+  });
+  r.quit();
+
 });
 
 // This follows the same format as socket requests
@@ -81,8 +103,8 @@ app.get('/', function(request, response) {
 
 app.get('/channel/:channel/:value', function(request, response){
   
-  var channel = request.params.channel;
-  var value = request.params.value;
+  channel = request.params.channel;
+  value = request.params.value;
   
   if(channel=='tags') {
     
@@ -102,22 +124,123 @@ app.get('/channel/:channel/:value', function(request, response){
     
   } else if(channel=='users') {
     
-   // pull access token for this user from redis and then:
-   //Instagram.users.recent({ user_id: INT, access_token: TOKEN });
-   // future updates will be handled by the generic subscription handler 
-   // as user real-time subscriptions are not user specific
-            
+    username = request.params.value
+    
+    // Display a list of this user's recent media, real-time updates will 
+    // be handled by the generic subscription handler as these subscriptions
+    // are not user specific
+    var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+    r.hget('authenticated_users', username,function(error,user){
+      user_data = JSON.parse(user);
+      helpers.instagram.users.recent({ 
+        user_id: user_data.user.id, 
+        access_token: user_data.access_token,
+        complete: function(data,pagination) {
+        	response.render('channels/users', { locals: { media: data, user: user_data.user } });
+        },
+        error: function(errorMessage, errorObject, caller) {
+          response.render('error', { locals: { error: errorMessage } });
+        }
+      });
+    });
+    r.quit();
+          
   } else if(channel=='locations') {
-      
+    
+    location = request.params.value
+    geo.geocoder(geo.google, location, false, function(formattedAddress, latitude, longitude) {
+        console.log("Formatted Address: " + formattedAddress);
+        console.log("Latitude: " + latitude);
+        console.log("Longitude: " + longitude);
+    });
+ 
   } else if(channel=='geographies') {
-  
+    
+    // This should be an instagram location id
+    geography = request.params.value
+    
+    // Grab recent photos for this geography
+    var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+    r.hget('geographies', geography, function(error, geography){
+      geography_data = JSON.parse(geography)
+      helpers.instagram.geographies.recent({ 
+        geography_id: geography_data.object_id,
+        complete: function(data,pagination) {
+        	response.render('channels/geographies', { locals: { media: data, geography: geography_data } });
+        },
+        error: function(errorMessage, errorObject, caller) {
+          response.render('error', { locals: { error: errorMessage } });
+        }
+      });
+    });
+    r.quit();
+
   } else {
     
     // Unrecognised channel
     response.render('error', { 
       locals: { error: 'Pardon?' } 
     });
+
+  }
+  
+});
+
+// Location based requests are a little more complicated
+// and generally need lat-lngs or search terms translated
+// into either instagram 'locations' (based on 4sq) or 
+// instagram 'geographies' (arbitrary areas) defined by lat-lng
+
+app.post('/channel/:channel/', function(request,response) {
+  
+  channel = request.params.channel;
+  
+  if(channel=="geographies") {
+
+    if(request.body.address) {
+      geo.geocoder(geo.google, request.body.address, false, function(formattedAddress, lat, lng) {
+         helpers.instagram.geographies.subscribe({ 
+            lat: lat,
+            lng: lng,
+            radius: 200,
+            complete: function(data) {
+              data.geography_name = request.body.address;
+              data.latitude = lat;
+              data.longitude = lng;
+              var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+              r.hset('geographies', data.object_id, JSON.stringify(data),function(error,result){
+                response.redirect('/channel/geographies/'+data.object_id)
+              });
+              r.quit();
+            }
+          });
+      });
+    } else if (request.body.lat && request.body.lng) {
+      helpers.instagram.geographies.subscribe({ 
+        lat:request.body.lat,
+        lng: request.body.lng,
+        radius: request.body.radius,
+        complete: function(data) {
+          data.latitude = request.body.lat;
+          data.longitude = request.body.lng;
+          data.geography_name = 'nearby';
+          var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+          r.hset('geographies', data.object_id, JSON.stringify(data),function(error,result){
+            response.redirect('/channel/geographies/'+data.object_id)
+          });
+          r.quit();
+        }
+      });
+    } else {
+        response.render('error', { 
+          locals: { error: 'Pardon?' } 
+        });
+    }
     
+  } else {
+    response.render('error', { 
+      locals: { error: 'Pardon?' } 
+    });
   }
   
 });
@@ -135,13 +258,16 @@ app.get('/subscriptions/delete', function(request, response) {
   var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
   r.flushdb();
   r.quit();
-  response.send('OK');
+  response.render('confirmation');
 });
 
 // Remove a user from our authenticated list
 
-app.get('/user/delete', function(request,reponse){
-  //remove from redis, can't un-oauth at this time
+app.get('/user/delete/:username', function(request,response){
+  var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+  r.hdel('authenticated_users', request.params.username);
+  r.quit();
+  response.render('confirmation');
 });
 
 app.listen(settings.appPort);

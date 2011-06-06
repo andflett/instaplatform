@@ -1,9 +1,10 @@
-<section id="what">
-  <h2>What</h2
+<section id="what" class="channel">
+  <h2>What</h2>
+  <p>Search for hashtags, view a steam of photos based on that topic.</p>
   <form action="/search/tags" method="post">
     <fieldset>
       <label for="cause" class="text">
-        <span>Topic or tag</span>
+        <span>Keyword</span>
         <input type="text" name="value" class="value" />
       </label>
     </fieldset>
@@ -11,51 +12,67 @@
       <input type="submit" value="Find" />
     </fieldset>
   </form>
+  <div id="results">
+    
+  </div>
 </section>
 
-<!-- END POINTS FOR LOCATION AND GEOGRAPHIES: 
+<section id="where" class="channel">
+  <h2>Where</h2>
+  <p>Three very basic examples of how the location-based real-time subscriptions could be used.</p>
+  
+  <h3>Photographs near me</h3>
+  <p>Hang on, we're tring to geolocate you...</p>
+  <p>If this works, you're lat and lng will appear below, if this fails, try typing in them in manually.</p>
+  <!-- auto geolocate on page load - create a 'geography' then subscribe to it -->
+   <form action="/channel/geographies/" method="post">
+     <fieldset>
+       <label for="lat">
+         <span>Latitude</span>
+         <input type="text" name="lat" id="lat" />
+       </label>
+       <label for="lng">
+         <span>Longitude</span>
+         <input type="text" name="lng" id="lng" />
+       </label>
+       <input type="hidden" name="radius" id="radius" value="50" />
+     </fieldset>
+     <fieldset class="controls">
+       <input type="submit" value="Show photographs" />
+     </fieldset>
+   </form>
 
-Location: channel/locations/4sqLocationID
-Geographies: channel/geographies/lat.lon
-
--->
-
-<!-- test the supposed 'name' param on the instagram node lib,
-otherwise this is going to have to be a lat/lon thing, maybe, 
-for this demo, just use the browser's geolocate to get a lat-lon
-then suggest a list of nearby places.
-
-could use a geonode type thing to get a lat-lon from a keyword, 
-then show a list of nearby, then go to the end point... but...
-that's a lot of jumping around. (see geography below). Leave this
-sort of nonsense to anyone who implements the platform
-
-could enhance with a map drag/drop type thing -->
-
-<!-- run a keyword through geonode, then use resulting lat-lon to take
-you to /location/lat-lon/ 
-
-...also offer a simple manual lat-lon search -->
-<section id="where">
-  <h2>Where</h2
-  <form action="/search/locations" method="post">
-    
+  <h3>Photographs for a location</h3>
+  <form action="/channel/geographies/" method="post">
+    <fieldset>
+      <label for="address" class="text">
+        <span>City or address</span>
+        <input type="text" name="address" />
+      </label>
+    </fieldset>
     <fieldset class="controls">
-      <input type="submit" value="Find" />
+      <input type="submit" value="Show photographs" />
     </fieldset>
   </form>
+
+  <h3>Photographs for a place</h3>
+  <p>Museum, bar, office etc. based on search terms or just 'nearby' places.</p>
+  <!-- auto geolocate, show a list of 'places' nearby - maybe show a map here, see how time goes -->
+  <p class="cta">Coming very soon&hellip;</p>
 </section>
 
-<!-- probably need to authenticate, then redirect to 
-authenicated-users-path/currently-authenticated-users-id/ -->
-
-<section id="who">
+<section id="who" class="channel">
   <h2>Who</h2>
-  <!-- if authed -->
-  <p><a href="">Add me to this list</a></p>
-  <!-- else, remove me link -->
-  <ul id="users">
-    <li><a href="/channel/users/username">Authenticated user</a></li>
+  <p>A real-time stream of users who have previously authenticated themselves with this application.</p>
+  <h3>Users</h3>
+  <p class="cta">You can <a href="<%= authorization_url %>">add yourself</a> to this list</p>
+  
+  <ul id="users" class="list">
+    <% for(i in authenticated_users) {
+      user_data = JSON.parse(authenticated_users[i])
+    %>
+    <li><a href="/channel/users/<%= user_data.user.username %>"><%= user_data.user.username %></a></li>
+    <% } %>
   </ul>
 </section>
 

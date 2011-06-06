@@ -1,7 +1,7 @@
-<h2>Live updates from your stream</h2>
-<p class="help">Updates will appear here as soon as they are tagged on Instagram.</p>
-<ul class="append-live-data" data-subscription="channel:users:<%= user %>">
+<h2>Live updates from <%= user.username %></h2>
+<p class="help">Updates will appear here as soon as they posted to Instagram.</p>
+<ul class="append-live-data" data-subscription="channel:users:<%= user.username %>">
 <% for(var i=0; i<media.length; i++) { %>
-  <li><img src="<%= media[i].images.standard_resolution.url %>" /></li>
+  <li><a href="<%= media[i].link %>"><img src="<%= media[i].images.standard_resolution.url %>" /></a></li>
 <% } %>
 </ul>

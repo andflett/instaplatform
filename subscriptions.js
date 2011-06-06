@@ -26,10 +26,12 @@ socket.on('connection', function(client){
     
       if(method=='subscribe') {
         
+        // Subscribe to a channel
         client.subscriptions['channel:'+channel+':'+value] = true;
         
       } else if(method=='search') {
         
+        // Tag Search
         var update = { 'type': 'searchResults' };
         helpers.instagram.tags.search({q:value,
           complete: function(data) {
@@ -65,7 +67,7 @@ r.on('pmessage', function(pattern, channel, message){
     var data = JSON.parse(message);
     console.log('New pictars: '+channel);
 
-    // Send out update to subscribers
+    // Send out update to subscribers. Client is expected to listen for 'newMedia' event
     var update = { 'type': 'newMedia', 'media': data, 'channel': channel };
     for(sessionId in socket.clients) {
       if(socket.clients[sessionId].subscriptions[channel]) {

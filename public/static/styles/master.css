@@ -1,82 +1,195 @@
 body {
-	font-family: "Helvetica Neue", Helvetica;
-	background-color: #222;
-	color: #eee;
+  font-family: "Helvetica Neue", Helvetica;
+  background-color: #eee;
+  color: #222;
 }
 
-#platform {
-	width: 662px;
-	margin: 0 auto;
-}
+/* Typography */
 
-h1 {
-	text-align: center;
-}
+  h1, h2, h3 {
+  	font-size: 1.25em;
+  	font-weight: 100;
+  	letter-spacing: 1px;
+  	line-height: 27px;
+  	margin-bottom: 1em;
+  }
+  
+  h2 { 
+    margin-bottom: 0.75em;
+  }
 
-h2 {
-	font-size: 1.25em;
-	font-weight: 100;
-	letter-spacing: 1px;
-	line-height: 27px;
-	margin-bottom: 1em;
-}
+  h3 {
+    font-size: 0.925em;
+    margin-bottom: 0.5em;
+    line-height: 1.25em;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+  }
 
-h3 {
-	font-size: 0.925em;
-	font-weight: 100;
-	letter-spacing: 1px;
-	line-height: 1.25em;
-	margin-bottom: 0.5em;
-}
+  a {
+    color:#eee;
+    text-decoration: underline;
+  }
 
-h3 span {
-  display: block;
-  font-size: 0.75em;
-}
+  a:hover, a:focus, a:active {
+    text-decoration: none;
+  }
+  
+  p {
+    line-height: 1.5em; 
+    font-size: 0.825em;
+    margin-bottom: 1em;
+  }
+  
+  ul li {
+    line-height: 1.25em; 
+    font-size: 0.825em;
+  }
+  
+  ul.list li {
+    list-style-type: disc;
+    margin-left: 20px;
+  }
+  
+  form {
+    padding: 10px 0 20px;
+  }
 
-a {
-	color:  #eee;
-	text-decoration: none;
-}
-a:hover {
-	text-decoration: underline;
-}
+/* Layout */
 
-#primary-content {
-	width: 642px;
-	padding: 25px;
-	background: #000;
-	-webkit-border-radius: 10px;
-	-moz-border-radius: 10px;
-	border-radius: 10px;
-	border-bottom: 1px solid #333;
-	position: relative;
-}
+  div#platform {
+    width: 642px;
+    margin: 0 auto;
+  	padding-bottom: 30px;
+  }
 
-.data-grid {
-  width: 100%; 
-  overflow: hidden;
-}
+  div#platform.home {
+  	width: 800px;
+  }
+  
+  header { 
+    padding: 20px 0 25px;
+  }
+  
+  header h1 {
+   margin-bottom: 5px;
+   font-weight: bold;
+   text-shadow: 1px 1px 0 #fff;
+   font-size: 1.5em;
+  }
+  
+  header h1 a {
+    color: #222;
+    text-decoration: none;
+  }
+  
+  header h1 a:hover, header h1 a:focus, header h1 a:active {
+    text-decoration: underline;
+  }
+  
+  header p {
+    font-style: italic;
+    font-size: 0.75em;
+    margin-bottom: 0em;
+  }
+  
+  section#primary-content {
+    background: #222;
+    color: #eee;
+    padding: 15px;
+    box-shadow: 1px 1px 0 #fff;
+    -moz-box-shadow: 1px 1px 0 #fff;
+    -webkit-box-shadow: 1px 1px 0 #fff;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    border-bottom: 1px solid #333;
+    position: relative;
+    overflow: hidden;
+    width: 612px;
+  }
+  
+  .home section#primary-content {
+    width: 770px;
+  }
 
-.data-grid li {
-  list-style-type: none;
-  width: 150px; float: left;
-  margin: 0 10px 20px 0;
-}
+  section#primary-content section.channel {
+    width: 220px;
+    float: left;
+    padding-right: 10px;
+    margin-right: 20px;
+  }
+  
+  section#primary-content section.channel:last-child {
+    margin: 0;
+  }
+  
+/* Assets */
 
-.data-grid li a:hover,
-.data-grid li a:active,
-.data-grid li a:focus
-{  text-decoration: none; }
+  p.cta { 
+    font-style: italic;
+    font-size: 0.75em;
+  }
 
-.data-grid li img {
-  border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  opacity: 1;
-}
+  .data-grid {
+    width: 100%; 
+    overflow: hidden;
+  }
 
-.data-grid li:hover img {
- opacity: 0.8; 
-}
+  .data-grid li {
+    list-style-type: none;
+    width: 150px; float: left;
+    margin: 0 10px 20px 0;
+  }
 
+  .data-grid li a:hover,
+  .data-grid li a:active,
+  .data-grid li a:focus
+  {  text-decoration: none; }
+
+  .data-grid li img {
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    opacity: 1;
+  }
+
+  .data-grid li:hover img {
+   opacity: 0.8; 
+  }
+  
+  .append-live-data li { padding: 10px 0 25px; height: 612px; }
+  .append-live-data li img {
+    display: block;
+    border-radius: 15px;
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+  }
+
+/* Forms */
+
+  label { 
+    display:block;
+    padding-bottom: 10px; 
+  }
+
+  label span {
+    font-size: 0.75em;
+    display: block;
+    padding-bottom: 3px;
+  }
+  
+  label input[type="text"] {
+    font-size: 0.825em;
+    border: 1px solid #eee;
+    padding: 2px;
+  }
+  
+  input[type="submit"] {
+    font-size: 0.75em;
+    padding: 3px 6px;
+    cursor: pointer;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    background: #eee;
+  }

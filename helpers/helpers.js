@@ -1,12 +1,43 @@
 var settings = require('../settings'),
     redis = require('redis'),
-    settings = require('../settings');
+    settings = require('../settings'),
+    tags = require('./tags'),
+    geographies = require('./geographies'),
+    locations = require('./locations'),
+    users = require('./users');
 
 // Channel helpers
-exports.tags = require('./tags'),
-exports.geographies = require('./geographies'),
-exports.locations = require('./locations'),
-exports.users = require('./users');
+exports.tags = tags;
+exports.geographies = geographies;
+exports.locations = locations;
+exports.users = users;
+
+// Updates router
+function processUpdates(updates) {
+  
+  // Go through and process each update. Note that every update doesn't
+  // include the updated data - we use the data in the update to query
+  // the Instagram API to get the data we want.  
+  for(index in updates) {
+    
+    var update = updates[index];
+
+    // Two at the same time gets messy, channels are being mixed
+    // Probably best to pass the entire update to the handler then
+    // verify at the process level
+    
+    // or perhaps pass the 'updates' object and iterate through it
+    // from a different function to avoid arrays being combined
+
+    if(update['object'] == "tag") tags.processUpdate(update['object_id']);
+    if(update['object'] == "geography") geographies.processUpdate(update['object_id']);
+    if(update['object'] == "location") locations.processUpdate(update['object_id']);
+    if(update['object'] == "user") users.processUpdate(update['object_id']);
+
+  }
+  
+}
+exports.processUpdates = processUpdates;
 
 // Instagram node library
 var instagram = require('instagram-node-lib');

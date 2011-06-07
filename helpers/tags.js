@@ -40,7 +40,7 @@ function processUpdate(tagName){
   
   channel = 'channel:tags:'+tagName;
   
-  helpers.getMinID(channel, function(error, minID){
+  helpers.getMinID(channel, function(error, minID) {
     if(error != null) minID = 0;
     helpers.instagram.tags.recent({ 
       name: tagName, 

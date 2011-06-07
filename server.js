@@ -57,26 +57,8 @@ app.post('/callbacks', function(request, response){
   var providedSignature = request.headers['x-hub-signature'];
   var calculatedSignature = hmac.digest(encoding='hex');
   if((providedSignature != calculatedSignature) || !request.body) response.send('FAIL');
-      
-  // Go through and process each update. Note that every update doesn't
-  // include the updated data - we use the data in the update to query
-  // the Instagram API to get the data we want.
-  var updates = request.body;  
   
-  for(index in updates) {
-    
-    // Instagram seems to issue the update notification before the
-    // media is actually available to the non-realtime API, so
-    // we have a timeout before sending updates to the users
-    
-    var update = updates[index];
-  	
-    if(update['object'] == "tag") setTimeout(function(){ helpers.tags.processUpdate(update['object_id']); } ,2000);
-    if(update['object'] == "geography") setTimeout(function(){ helpers.geographies.processUpdate(update['object_id']); } ,2000);
-    if(update['object'] == "location") setTimeout(function(){ helpers.locations.processUpdate(update['object_id']); } ,2000);
-    if(update['object'] == "user") setTimeout(function(){ helpers.users.processUpdate(update['object_id']); } ,2000);
-        
-  }
+  helpers.processUpdates(request.body);
   
 });
 

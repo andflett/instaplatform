@@ -96,6 +96,10 @@ body {
     margin-bottom: 0em;
   }
   
+  header p a {
+    color: #222;
+  }
+  
   section#primary-content {
     background: #222;
     color: #eee;

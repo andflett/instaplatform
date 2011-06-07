@@ -22,9 +22,7 @@
   <p>Three very basic examples of how the location-based real-time subscriptions could be used.</p>
   
   <h3>Photographs near me</h3>
-  <p>Hang on, we're tring to geolocate you...</p>
-  <p>If this works, you're lat and lng will appear below, if this fails, try typing in them in manually.</p>
-  <!-- auto geolocate on page load - create a 'geography' then subscribe to it -->
+  <p>We're tring to geolocate you... If this works, you're lat and lng will appear below, if this fails, try typing in them in manually.</p>
    <form action="/channel/geographies/" method="post">
      <fieldset>
        <label for="lat">
@@ -49,24 +47,29 @@
         <span>City or address</span>
         <input type="text" name="address" />
       </label>
+      <label for="radius" class="text">
+        <span>Radius (for a city, you probably want something like 5000, for an park, 500, for an office, 100 should do)</span>
+        <input type="text" name="radius" value="1000" />
+      </label>
     </fieldset>
     <fieldset class="controls">
       <input type="submit" value="Show photographs" />
     </fieldset>
   </form>
 
-  <h3>Photographs for a place</h3>
-  <p>Museum, bar, office etc. based on search terms or just 'nearby' places.</p>
-  <!-- auto geolocate, show a list of 'places' nearby - maybe show a map here, see how time goes -->
-  <p class="cta">Coming very soon&hellip;</p>
+  <h3>Photographs for a 'place'</h3>
+  <p>Places are based on check-in locations on Foursquare.</p>
+  <ul class="list">
+    <li><a href="/channel/locations/271198/">Made by Many</a></li>
+    <li><a href="/channel/locations/502494/">National Museum of Scotland</a></li>
+  </ul>
 </section>
 
 <section id="who" class="channel">
   <h2>Who</h2>
   <p>A real-time stream of users who have previously authenticated themselves with this application.</p>
-  <h3>Users</h3>
+  <h3>Authorised Users</h3>
   <p class="cta">You can <a href="<%= authorization_url %>">add yourself</a> to this list</p>
-  
   <ul id="users" class="list">
     <% for(i in authenticated_users) {
       user_data = JSON.parse(authenticated_users[i])

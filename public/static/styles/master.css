@@ -15,14 +15,17 @@ body {
   }
   
   h2 { 
-    margin-bottom: 0.75em;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.25em;
   }
 
   h3 {
     font-size: 0.925em;
     margin-bottom: 0.5em;
     line-height: 1.25em;
-    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
     padding-top: 10px;
   }
 
@@ -118,6 +121,7 @@ body {
     float: left;
     padding-right: 10px;
     margin-right: 20px;
+    padding-bottom: 15px;
   }
   
   section#primary-content section.channel:last-child {
@@ -176,6 +180,7 @@ body {
   label span {
     font-size: 0.75em;
     display: block;
+    line-height: 1.25em;
     padding-bottom: 3px;
   }
   

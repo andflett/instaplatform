@@ -7,14 +7,24 @@ var redis = require('redis'),
 // tag name from the update, and make the call to the API.
 
 function processUpdate(geographyID){
+  
+  channel = 'channel:geographies:'+geographyID;
+  
+  helpers.getMinID(channel, function(error, minID){
+    if(error != null) minID = 0;
     helpers.instagram.geographies.recent({ 
       geography_id: geographyID,
-      count: 1,
+      min_id: minID,
       complete: function(data,pagination) {
+        helpers.setMinID(channel, data, false);
         var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
-        r.publish('channel:geographies:' + geographyID, JSON.stringify(data));
+        r.publish(channel, JSON.stringify(data));
         r.quit();
       }
     });
+  });
+  
 }
 exports.processUpdate = processUpdate;
+
+

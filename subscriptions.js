@@ -65,6 +65,7 @@ r.on('pmessage', function(pattern, channel, message){
   if(pattern == subscriptionPattern){
 
     var data = JSON.parse(message);
+    
     console.log('New pictars: '+channel);
 
     // Send out update to subscribers. Client is expected to listen for 'newMedia' event

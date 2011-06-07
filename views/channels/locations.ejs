@@ -1,7 +1,11 @@
-<h2>Live updates for <%= location %></h2>
-<p class="help">Updates will appear here as soon as they are posted on Instagram.</p>
+<h2>Live updates for location ID: <%= location %></h2>
+<% if (media.length==0) { %>
+  <p class="help">There have been no recent photos posted, hang around long enough and one may appear.</p>
+<% } else { %>
+  <p class="help">Updates will appear here as soon as they are posted on Instagram.</p>  
+<% }%>
 <ul class="append-live-data" data-subscription="channel:locations:<%= location %>">
 <% for(var i=0; i<media.length; i++) { %>
-  <li><a href="<%= media[i].link %>"><img src="<%= media[i].images.standard_resolution.url %>" /></a></li>
+  <li id="media-<%= media[i].id %>"><a href="<%= media[i].link %>"><img src="<%= media[i].images.standard_resolution.url %>" /></a></li>
 <% } %>
 </ul>

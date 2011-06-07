@@ -2,7 +2,7 @@
 
 This is intended as a platform to allow for the rapid development Instagram-fed real-time web applications. 
 
-See my <a href="http://madebymany.com/blog/a-picture-is-worth-140-characters">blog post</a> for some background on this project.
+See my <a href="http://madebymany.com/blog/a-picture-is-worth-140-characters">blog post</a> for some background on this project, or the <a href="http://78.129.171.37:3000/">demo</a> site.
 
 ## What does what
 
@@ -26,14 +26,14 @@ You'll need to sign up for an Instagram API developer account and create a clien
 
   http://instagr.am/developer/manage/
 
-## Install Node.js 
+### Install Node.js 
 
   curl -O http://nodejs.org/dist/node-v0.4.8.tar.gz
   tar xvf node-v0.4.8.tar.gz
   ./configure
   sudo make && sudo make install
 
-## Install and run Redis
+### Install and run Redis
 
   curl -O http://redis.googlecode.com/files/redis-2.2.1.tar.gz
   tar xvf redis-2.2.1.tar.gz
@@ -44,11 +44,11 @@ You'll need to sign up for an Instagram API developer account and create a clien
   cd /your-app/
   ./redis-server conf/redis.conf
 
-## Install NPM (Node package manager)
+### Install NPM (Node package manager)
 
   curl http://npmjs.org/install.sh | sh
 
-## Install required node libraries
+### Install required node libraries
 
   cd /your-app/
 
@@ -63,7 +63,7 @@ Add your client_id and client_secret to settings.js
 
   ./node server.js
 
-## Subscribe to your authenticated users' feeds
+### Subscribe to your authenticated users' feeds
 
 All other subscriptions are handled by the app code itself, but as this is a one-off, you may as well subscribe to it now.
 

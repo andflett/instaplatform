@@ -75,7 +75,7 @@ app.post('/callbacks', function(request, response){
     if(update['object'] == "geography") setTimeout(function(){ helpers.geographies.processUpdate(update['object_id']); } ,2000);
     if(update['object'] == "location") setTimeout(function(){ helpers.locations.processUpdate(update['object_id']); } ,2000);
     if(update['object'] == "user") setTimeout(function(){ helpers.users.processUpdate(update['object_id']); } ,2000);
-    
+        
   }
   
 });
@@ -114,11 +114,12 @@ app.get('/channel/:channel/:value', function(request, response){
     helpers.instagram.tags.recent({ 
       name: value, 
       complete: function(data,pagination) {
-        helpers.tags.setMaxTagID(value, pagination);
+        helpers.setMinID('channel:'+channel+':'+value, data, pagination.min_tag_id);
       	response.render('channels/tags', { locals: { media: data, tag: value } });
       },
       error: function(errorMessage, errorObject, caller) {
-        response.render('error', { locals: { error: errorMessage } });
+        console.log(errorMessage);
+        response.render('channels/tags', { locals: { media: new Array(), tag: value } });
       }
     });
     
@@ -139,7 +140,8 @@ app.get('/channel/:channel/:value', function(request, response){
         	response.render('channels/users', { locals: { media: data, user: user_data.user } });
         },
         error: function(errorMessage, errorObject, caller) {
-          response.render('error', { locals: { error: errorMessage } });
+          console.log(errorMessage);
+          response.render('channels/users', { locals: { media: new Array(), user: user_data.user } });        
         }
       });
     });
@@ -148,10 +150,25 @@ app.get('/channel/:channel/:value', function(request, response){
   } else if(channel=='locations') {
     
     location = request.params.value
-    geo.geocoder(geo.google, location, false, function(formattedAddress, latitude, longitude) {
-        console.log("Formatted Address: " + formattedAddress);
-        console.log("Latitude: " + latitude);
-        console.log("Longitude: " + longitude);
+    
+    // Ensure we're subscribed to this location then
+    // load the latest photos from the static API
+    helpers.locations.validateSubscription(location);
+    
+    var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+    r.hget('locations', location, function(error,location_data){
+      loc_data = JSON.parse(location_data);
+      helpers.instagram.locations.recent({ 
+        location_id: location, 
+        complete: function(data,pagination) {
+          helpers.setMinID('channel:'+channel+':'+location, data, false);
+        	response.render('channels/locations', { locals: { media: data, location: loc_data } });
+        },
+        error: function(errorMessage, errorObject, caller) {
+          console.log(errorMessage);
+          response.render('channels/locations', { locals: { media: new Array(), location: loc_data } });
+        }
+      });
     });
  
   } else if(channel=='geographies') {
@@ -166,10 +183,11 @@ app.get('/channel/:channel/:value', function(request, response){
       helpers.instagram.geographies.recent({ 
         geography_id: geography_data.object_id,
         complete: function(data,pagination) {
+          helpers.setMinID('channel:'+channel+':'+geography_data.object_id, data, false);
         	response.render('channels/geographies', { locals: { media: data, geography: geography_data } });
         },
         error: function(errorMessage, errorObject, caller) {
-          response.render('error', { locals: { error: errorMessage } });
+          response.render('channels/geographies', { locals: { media: new Array(), geography: geography_data } });
         }
       });
     });
@@ -202,7 +220,7 @@ app.post('/channel/:channel/', function(request,response) {
          helpers.instagram.geographies.subscribe({ 
             lat: lat,
             lng: lng,
-            radius: 200,
+            radius: request.body.radius,
             complete: function(data) {
               data.geography_name = request.body.address;
               data.latitude = lat;

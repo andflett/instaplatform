@@ -1,7 +1,7 @@
 /*
 
-  All rather messy at the moment - needs some form of sensible
-  front-end library, or something...
+  All rather messy at the moment - needs some form of 
+  sensible front-end library, or something...
   
 */
 
@@ -12,17 +12,13 @@ socket.connect();
 // Init event listeners for any newMedia messages across the socket
 var Media = {
   onNewMedia: function(ev) {
-    
     $('.first').removeClass('first');
     $('#primary-content p.help').after('<ul class="append-live-data first" data-subscription="'+ev.channel+'"></ul>');
     $('.first').hide();
-    
     $(ev.media).each(function(index, media){
-      $('.first[data-subscription="'+ev.channel+'"]').prepend('<li><a href="'+media.link+'"><img src="'+media.images.standard_resolution.url+'" /></a></li>');
+      $('.first[data-subscription="'+ev.channel+'"]').prepend('<li id="media-'+media.id+'"><a href="'+media.link+'"><img src="'+media.images.standard_resolution.url+'" /></a></li>');
     });
-    
     $('.first').slideDown('slow');
-    
   }
 };
 $(document).bind("newMedia", Media.onNewMedia)

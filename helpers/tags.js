@@ -37,35 +37,22 @@ exports.validateTagSubscription = validateTagSubscription;
 // tag name from the update, and make the call to the API.
 
 function processUpdate(tagName){
-  getMaxTagID(tagName, function(error, maxTagID){
+  
+  channel = 'channel:tags:'+tagName;
+  
+  helpers.getMinID(channel, function(error, minID){
+    if(error != null) minID = 0;
     helpers.instagram.tags.recent({ 
       name: tagName, 
-      max_tag_id: maxTagID,
+      min_tag_id: minID,
       complete: function(data,pagination) {
-        setMaxTagID(tagName, pagination);
+        helpers.setMinID(channel, data, pagination.min_tag_id);
         var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
-        r.publish('channel:tags:' + tagName, JSON.stringify(data));
+        r.publish(channel, JSON.stringify(data));
         r.quit();
       }
     });
   });
+  
 }
 exports.processUpdate = processUpdate;
-
-// Setting and Getting for API-call pagination
-// This is Tag specific, the pagination objects
-// seem to be inconsitant across subsciption channels
-
-function getMaxTagID(tagName, callback){
-  var r = redis.createClient(settings.REDIS_PORT, settings.REDIS_HOST);
-  r.get('max-tag-id:channel:' + tagName, callback);
-  r.quit();
-}
-exports.getMaxTagID = getMaxTagID;
-
-function setMaxTagID(tagName, pagination){
-  var r = redis.createClient(settings.REDIS_PORT, settings.REDIS_HOST);
-  r.set('max-tag-id:channel:' + tagName, pagination.next_max_id);
-  r.quit();
-}
-exports.setMaxTagID = setMaxTagID;

@@ -8,7 +8,6 @@ var redis = require('redis'),
 
 function processUpdate(userId){
   
-  
   // Only render the most recent image, assuming that the
   // user hasn't managed to post more than one in the time
   // it's taken us to process the update
@@ -21,9 +20,7 @@ function processUpdate(userId){
       access_token: user_data.access_token,
       count: 1,
       complete: function(data,pagination) {
-        var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
         r.publish('channel:users:' + user_data.user.username, JSON.stringify(data));
-        r.quit();
       },
       error: function(errorMessage, errorObject, caller) {
         response.render('error', { locals: { error: errorMessage } });

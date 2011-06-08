@@ -66,12 +66,12 @@ app.post('/callbacks', function(request, response){
 
 app.get('/', function(request, response) {
   
-  // URL to allow users to authenticate and add themselves to the app
-  authorization_url = helpers.instagram.oauth.authorization_url({});
   channel = 'home'
   
-  // Pull a list of authenticated users from our local cache 
-  // then render the homepage
+  // URL to allow users to authenticate and add themselves to the app
+  authorization_url = helpers.instagram.oauth.authorization_url({});
+  
+  // Pull a list of authenticated users from redis, render the homepage
   var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
   user_hash = r.hgetall('authenticated_users', function(error, user_hash){
     response.render('home', {locals: {authenticated_users:user_hash}});
@@ -92,7 +92,7 @@ app.get('/channel/:channel/:value', function(request, response){
     
     // Ensure we're subscribed to this tag then
     // load the latest photos from the static API
-    helpers.tags.validateTagSubscription(value);
+    helpers.verifySubscription('tags',value);
     helpers.instagram.tags.recent({ 
       name: value, 
       complete: function(data,pagination) {
@@ -135,7 +135,7 @@ app.get('/channel/:channel/:value', function(request, response){
     
     // Ensure we're subscribed to this location then
     // load the latest photos from the static API
-    helpers.locations.validateSubscription(location);
+    helpers.verifySubscription('locations',value);
     
     var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
     r.hget('locations', location, function(error,location_data){
@@ -198,45 +198,33 @@ app.post('/channel/:channel/', function(request,response) {
   if(channel=="geographies") {
 
     if(request.body.address) {
-      geo.geocoder(geo.google, request.body.address, false, function(formattedAddress, lat, lng) {
-         helpers.instagram.geographies.subscribe({ 
-            lat: lat,
-            lng: lng,
-            radius: request.body.radius,
-            complete: function(data) {
-              data.geography_name = request.body.address;
-              data.latitude = lat;
-              data.longitude = lng;
-              var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
-              r.hset('geographies', data.object_id, JSON.stringify(data),function(error,result){
-                response.redirect('/channel/geographies/'+data.object_id)
-              });
-              r.quit();
-            }
-          });
+      geo.geocoder(geo.google, request.body.address, false, function(formattedAddress, latitude, longitude) {
+        helpers.verifySubscription('geographies', {
+          lat: lat,
+          lng: lng,
+          radius: request.body.radius,
+          name: formattedAddress
+        },
+        function(data) {
+          response.redirect('/channel/geographies/'+data.object_id)
+        });
       });
-    } else if (request.body.lat && request.body.lng) {
-      helpers.instagram.geographies.subscribe({ 
-        lat:request.body.lat,
+    } else if (request.body.lat && request.body.lng && request.body.radius) {
+      helpers.verifySubscription('geographies', {
+        lat: request.body.lat,
         lng: request.body.lng,
         radius: request.body.radius,
-        complete: function(data) {
-          data.latitude = request.body.lat;
-          data.longitude = request.body.lng;
-          data.geography_name = 'nearby';
-          var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
-          r.hset('geographies', data.object_id, JSON.stringify(data),function(error,result){
-            response.redirect('/channel/geographies/'+data.object_id)
-          });
-          r.quit();
-        }
+        name: 'nearby',
+      },
+      function(data) {
+        response.redirect('/channel/geographies/'+data.object_id)
       });
     } else {
-        response.render('error', { 
-          locals: { error: 'Pardon?' } 
-        });
+      response.render('error', { 
+        locals: { error: 'Pardon?' } 
+      });
     }
-    
+
   } else {
     response.render('error', { 
       locals: { error: 'Pardon?' } 

@@ -30,13 +30,16 @@ http://instagr.am/developer/manage/
 
     curl -O http://nodejs.org/dist/node-v0.4.8.tar.gz
     tar xvf node-v0.4.8.tar.gz
+    cd node-v0.4.8
     ./configure
-    sudo make && sudo make install
+    sudo make
+    sudo make install
 
 ### Install and run Redis
 
     curl -O http://redis.googlecode.com/files/redis-2.2.1.tar.gz
     tar xvf redis-2.2.1.tar.gz
+    cd redis-2.2.1
     ./configure
     sudo make
     sudo make install

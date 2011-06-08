@@ -23,12 +23,6 @@ function processUpdates(updates) {
     var update = updates[index];
 
     // Two at the same time gets messy, channels are being mixed
-    // Probably best to pass the entire update to the handler then
-    // verify at the process level
-    
-    // or perhaps pass the 'updates' object and iterate through it
-    // from a different function to avoid arrays being combined
-
     if(update['object'] == "tag") tags.processUpdate(update['object_id']);
     if(update['object'] == "geography") geographies.processUpdate(update['object_id']);
     if(update['object'] == "location") locations.processUpdate(update['object_id']);
@@ -47,6 +41,64 @@ instagram.set('callback_url', settings.CALLBACK_URL);
 instagram.set('redirect_uri', settings.REDIRECT_URL);
 exports.instagram = instagram
 
+
+// Check to see if we've already subscribed (locally check, no API call)
+// This could fail, if, for some reason, Instagram close our subscription
+// Should probably check occasionally, but not on every page load - don't
+// want to hammer the API too hard.
+
+function verifySubscription(channel,value,callback) {
+  
+  if(typeof(value)=='string') subscription = 'channel:'+channel+':'+value;
+  
+  var r = redis.createClient(settings.REDIS_PORT, settings.REDIS_HOST);
+  r.get(subscription+':subscription', function(error, sub) {
+    
+    // Subscribe to channel and store any meta data in Redis
+    if (sub == null) {
+      if (channel=='tags') {
+        instagram.tags.subscribe({ 
+          object_id: value, 
+          complete: function(data) {
+            instagram.tags.info({
+              name: value,
+              complete: function(data){
+                r.set(subscription+':subscriptions', data);
+              }
+            });
+          }
+        });
+      } else if (channel=='locations') {
+        instagram.locations.subscribe({ 
+          object_id: value, 
+          complete: function(data) {
+            instagram.locations.info({
+              location_id: value,
+              complete: function(data){
+                r.set(subscription+':subscriptions', data);
+              }
+            });
+          }
+        });
+      } else if (channel=='geographies') {
+        instagram.geographies.subscribe({ 
+          lat: value.lat,
+          lng: value.lng,
+          radius: value.radius,
+          complete: function(data) {
+            subscription = 'channel:'+channel+data.object_id
+            value.object_id = data.object_id;
+            r.set(subscription+':subscriptions', value, function(error,result) {
+              callback(value)
+            });
+          }
+        });
+      }
+    }
+  });
+  r.quit();
+}
+exports.verifySubscription = verifySubscription;
 
 /*
     In order to only ask for the most recent media, we store the MAXIMUM ID

@@ -138,8 +138,8 @@ app.get('/channel/:channel/:value', function(request, response){
     helpers.verifySubscription('locations',value);
     
     var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
-    r.hget('locations', location, function(error,location_data){
-      loc_data = JSON.parse(location_data);
+    r.get('channel:locations:'+location+':subscriptions',function(error,location_data){
+      loc_data = JSON.parse(location_data)
       helpers.instagram.locations.recent({ 
         location_id: location, 
         complete: function(data,pagination) {
@@ -160,12 +160,12 @@ app.get('/channel/:channel/:value', function(request, response){
     
     // Grab recent photos for this geography
     var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
-    r.hget('geographies', geography, function(error, geography){
-      geography_data = JSON.parse(geography)
+    r.get('channel:geographies:'+geography+':subscriptions',function(error,geography_data){
+      geography_data = JSON.parse(geography_data);
       helpers.instagram.geographies.recent({ 
-        geography_id: geography_data.object_id,
+        geography_id: geography,
         complete: function(data,pagination) {
-          helpers.setMinID('channel:'+channel+':'+geography_data.object_id, data, false);
+          helpers.setMinID('channel:'+channel+':'+geography, data, false);
         	response.render('channels/geographies', { locals: { media: data, geography: geography_data } });
         },
         error: function(errorMessage, errorObject, caller) {
@@ -198,14 +198,14 @@ app.post('/channel/:channel/', function(request,response) {
   if(channel=="geographies") {
 
     if(request.body.address) {
-      geo.geocoder(geo.google, request.body.address, false, function(formattedAddress, latitude, longitude) {
+      geo.geocoder(geo.google, request.body.address, false, function(formattedAddress, lat, lng) {
         helpers.verifySubscription('geographies', {
           lat: lat,
           lng: lng,
           radius: request.body.radius,
           name: formattedAddress
         },
-        function(data) {
+        function(error,data) {
           response.redirect('/channel/geographies/'+data.object_id)
         });
       });
@@ -216,7 +216,7 @@ app.post('/channel/:channel/', function(request,response) {
         radius: request.body.radius,
         name: 'nearby',
       },
-      function(data) {
+      function(error,data) {
         response.redirect('/channel/geographies/'+data.object_id)
       });
     } else {

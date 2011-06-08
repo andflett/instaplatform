@@ -49,11 +49,15 @@ exports.instagram = instagram
 
 function verifySubscription(channel,value,callback) {
   
-  if(typeof(value)=='string') subscription = 'channel:'+channel+':'+value;
+  if(typeof(value)=='string') { 
+    subscription = 'channel:'+channel+':'+value;
+  } else {
+    subscription = 'channel:'+channel+':'+value.name;
+  }
   
   var r = redis.createClient(settings.REDIS_PORT, settings.REDIS_HOST);
-  r.get(subscription+':subscription', function(error, sub) {
-    
+  r.get(subscription+':subscriptions', function(error, sub) {
+
     // Subscribe to channel and store any meta data in Redis
     if (sub == null) {
       if (channel=='tags') {
@@ -63,7 +67,9 @@ function verifySubscription(channel,value,callback) {
             instagram.tags.info({
               name: value,
               complete: function(data){
-                r.set(subscription+':subscriptions', data);
+                var r = redis.createClient(settings.REDIS_PORT, settings.REDIS_HOST);
+                r.set(subscription+':subscriptions', JSON.stringify(data));
+                r.quit();
               }
             });
           }
@@ -75,7 +81,9 @@ function verifySubscription(channel,value,callback) {
             instagram.locations.info({
               location_id: value,
               complete: function(data){
-                r.set(subscription+':subscriptions', data);
+                var r = redis.createClient(settings.REDIS_PORT, settings.REDIS_HOST);
+                r.set(subscription+':subscriptions', JSON.stringify(data));
+                r.quit();
               }
             });
           }
@@ -86,17 +94,20 @@ function verifySubscription(channel,value,callback) {
           lng: value.lng,
           radius: value.radius,
           complete: function(data) {
-            subscription = 'channel:'+channel+data.object_id
+            subscription = 'channel:'+channel+':'+data.object_id
             value.object_id = data.object_id;
-            r.set(subscription+':subscriptions', value, function(error,result) {
-              callback(value)
-            });
+            var r = redis.createClient(settings.REDIS_PORT, settings.REDIS_HOST);
+            r.set(subscription+':subscriptions', JSON.stringify(value));
+            r.quit();
+            callback(false,value);
           }
         });
       }
     }
+    
   });
   r.quit();
+  
 }
 exports.verifySubscription = verifySubscription;
 

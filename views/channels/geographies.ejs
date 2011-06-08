@@ -1,5 +1,5 @@
-<h2>Live updates for <%= geography.geography_name %></h2>
-<p><a href="http://www.gorissen.info/Pierre/maps/googleMapLocation.php?lat=<%= geography.latitude %>&amp;lon=<%= geography.longitude %>&amp;setLatLon=Set">View location on a map</a></p>
+<h2>Live updates for <%= geography.name %></h2>
+<p><a href="http://www.gorissen.info/Pierre/maps/googleMapLocation.php?lat=<%= geography.lat %>&amp;lon=<%= geography.lng %>&amp;setLatLon=Set">View location on a map</a></p>
 
 <% if (media.length==0) { %>
   <p class="help">There have been no recent photos posted, hang around long enough and one may appear.</p>

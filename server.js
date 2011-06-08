@@ -186,6 +186,42 @@ app.get('/channel/:channel/:value', function(request, response){
   
 });
 
+
+/*
+  Very experimental, mashing streams
+*/
+
+app.get('/weather/:geography', function(request, response){
+  
+    // This should be an instagram location id
+    geography = request.params.geography
+    tag = request.params.tag
+    channel = 'geography';
+    
+    // Grab recent photos for this geography
+    var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+    r.get('channel:geographies:'+geography+':subscriptions',function(error,geography_data){
+      geography_data = JSON.parse(geography_data);
+      
+      helpers.instagram.media.search({ 
+        lat: geography_data.lat,
+        lng: geography_data.lng,
+        distance: geography_data.radius,
+        count: 1000,
+        complete: function(data,pagination) {
+          helpers.setMinID('channel:'+channel+':'+geography, data, false);
+        	response.render('channels/weather', { locals: { media: data, geography: geography_data } });
+        },
+        error: function(errorMessage, errorObject, caller) {
+          response.render('channels/weather', { locals: { media: new Array(), geography: geography_data } });
+        }
+      });
+      
+    });
+    r.quit();
+    
+});
+
 // Location based requests are a little more complicated
 // and generally need lat-lngs or search terms translated
 // into either instagram 'locations' (based on 4sq) or 
@@ -224,7 +260,21 @@ app.post('/channel/:channel/', function(request,response) {
         locals: { error: 'Pardon?' } 
       });
     }
-
+    
+  } else if (channel=="weather") {
+    
+    geo.geocoder(geo.google, request.body.address, false, function(formattedAddress, lat, lng) {
+      helpers.verifySubscription('geographies', {
+        lat: lat,
+        lng: lng,
+        radius: request.body.radius,
+        name: formattedAddress
+      },
+      function(error,data) {
+        response.redirect('/weather/'+data.object_id)
+      });
+    });
+    
   } else {
     response.render('error', { 
       locals: { error: 'Pardon?' } 

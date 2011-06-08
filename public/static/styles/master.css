@@ -28,6 +28,8 @@ body {
     padding-bottom: 10px;
     padding-top: 10px;
   }
+  
+
 
   a {
     color:#eee;
@@ -43,6 +45,8 @@ body {
     font-size: 0.825em;
     margin-bottom: 1em;
   }
+  
+  ul { margin-bottom: 15px; }
   
   ul li {
     line-height: 1.25em; 
@@ -167,6 +171,9 @@ body {
   }
   
   .append-live-data li { padding: 10px 0 25px; height: 612px; }
+  .append-live-data li.weather { height: 642px; }
+  .append-live-data li h3 { margin-bottom: 10px; font-size: 1.25em; padding-top: 0; }
+  .append-live-data li  h3 span { font-size: 0.75em; }
   .append-live-data li img {
     display: block;
     border-radius: 15px;

@@ -1,0 +1,50 @@
+<h2 id="weather">Weather <%= geography.radius %>m around <%= geography.name %></h2>
+<p><a href="http://www.gorissen.info/Pierre/maps/googleMapLocation.php?lat=<%= geography.lat %>&amp;lon=<%= geography.lng %>&amp;setLatLon=Set">View location on a map</a></p>
+
+<% if (media.length==0) { %>
+  <p class="help">There have been no recent photos posted, hang around long enough and one may appear.</p>
+<% } else { %>
+  <p class="help">Updates will appear here as soon as they are posted on Instagram.</p>
+<% }%>
+
+<ul class="append-live-data" data-subscription="channel:geographies:<%= geography.object_id %>">
+<% 
+
+  var available_tags = new Array();
+  var weather_tags = new Array('sky','sun','cloud','rain','ice','snow','weather');
+  var weather_terms = new Array(' sky',' sun',' cloud',' rain',' ice',' snow','weather');
+  
+  for(var i=0; i<media.length; i++) {
+    show = new Array();
+    for(index in media[i].tags) {
+      if(weather_tags.indexOf(media[i].tags[index].toLowerCase())!=-1) show.push(' #'+media[i].tags[index]) 
+    }
+    if(media[i].caption!=null){
+      for(j in weather_terms) {
+        caption = media[i].caption.text.toLowerCase();
+        if(caption.indexOf(weather_terms[j])!=-1) show.push(' '+weather_terms[j])
+      }
+    }
+   
+    if(show.length>0) {
+      var date = new Date();
+      date.setTime( parseInt(media[i].created_time)*1000 );
+      var formattedTime = date.toUTCString();
+%>
+  <li id="media-<%= media[i].id %>" class="weather">
+    <h3><%= show %> <span>(taken <%= formattedTime %>)</span></h3>
+    <a href="<%= media[i].link %>">
+      <img src="<%= media[i].images.standard_resolution.url %>" />
+    </a>
+  </li>
+<%
+    } else { 
+      available_tags.push(media[i].tags);
+    }
+  } 
+%>
+</ul>
+
+<script script="text/javascript">
+socket.send('geographies:subscribe:<%= geography.object_id %>');
+</script>

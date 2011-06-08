@@ -59,7 +59,7 @@ function verifySubscription(channel,value,callback) {
   r.get(subscription+':subscriptions', function(error, sub) {
 
     // Subscribe to channel and store any meta data in Redis
-    if (sub == null) {
+    //if (sub == null) {
       if (channel=='tags') {
         instagram.tags.subscribe({ 
           object_id: value, 
@@ -103,7 +103,7 @@ function verifySubscription(channel,value,callback) {
           }
         });
       }
-    }
+    //}
     
   });
   r.quit();

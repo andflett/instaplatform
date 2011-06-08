@@ -9,14 +9,44 @@
 var socket = new io.Socket();
 socket.connect();
 
+
 // Init event listeners for any newMedia messages across the socket
 var Media = {
   onNewMedia: function(ev) {
+    
+    if($('#weather').length!=0) {
+      var available_tags = new Array();
+      var weather_tags = new Array('sky','sun','cloud','rain','ice','snow','weather');
+      var weather_terms = new Array(' sky ',' sun',' cloud',' rain',' ice',' snow', 'weather');
+    }
+    
     $('.first').removeClass('first');
     $('#primary-content p.help').after('<ul class="append-live-data first" data-subscription="'+ev.channel+'"></ul>');
     $('.first').hide();
     $(ev.media).each(function(index, media){
-      $('.first[data-subscription="'+ev.channel+'"]').prepend('<li id="media-'+media.id+'"><a href="'+media.link+'"><img src="'+media.images.standard_resolution.url+'" /></a></li>');
+      if($('#weather').length!=0) {
+        show = new Array();
+        for(i in media.tags) {
+          if(weather_tags.indexOf(media.tags[i].toLowerCase())!=-1) show.push(' #'+media.tags[i])
+        }
+        
+        if(media.caption!=null){
+          for(j in weather_terms) {
+            caption = media.caption.text.toLowerCase();
+            if(caption.indexOf(weather_terms[j])!=-1) show.push(' '+weather_terms[j])
+          }
+        }
+        
+        if(show.length>0) {
+          t = show.join(', ');
+          var date = new Date();
+          date.setTime( parseInt(media.created_time)*1000 );
+          var formattedTime = date.toUTCString();
+          $('.first[data-subscription="'+ev.channel+'"]').prepend('<li class="weather" id="media-'+media.id+'"><h3>'+t+' <span>(taken '+formattedTime+')</span></h3><a href="'+media.link+'"><img src="'+media.images.standard_resolution.url+'" /></a></li>');
+        }
+      } else {
+        $('.first[data-subscription="'+ev.channel+'"]').prepend('<li id="media-'+media.id+'"><a href="'+media.link+'"><img src="'+media.images.standard_resolution.url+'" /></a></li>');
+      }
     });
     $('.first').slideDown('slow');
   }

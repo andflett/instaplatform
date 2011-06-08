@@ -64,6 +64,21 @@
     <li><a href="/channel/locations/271198/">Made by Many</a></li>
     <li><a href="/channel/locations/502494/">National Museum of Scotland</a></li>
   </ul>
+  
+  <h3>Weather</h3>
+  <form action="/channel/weather/" method="post">
+    <fieldset>
+      <label for="address" class="text">
+        <span>Address or city</span>
+        <input type="text" name="address" />
+      </label>
+    </fieldset>
+    <fieldset class="controls">
+      <input type="hidden" name="radius" value="5000" />
+      <input type="submit" value="What's the weather like?" />
+    </fieldset>
+  </form>
+  
 </section>
 
 <section id="who" class="channel">

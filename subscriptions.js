@@ -1,21 +1,21 @@
 var redis = require('redis'),
-    io = require('socket.io'),
     settings = require('./settings'),
     helpers = require('./helpers/helpers'),
     app = settings.app,
-    subscriptionPattern = 'channel:*:*',
-    socket = io.listen(app);
+    subscriptionPattern = 'channel:*:*';
 
-socket.on('connection', function(client){
-  
+var io = require('socket.io').listen(app);
+ 
+io.sockets.on('connection', function(socket){
+ 
   // Container for this user's subscriptions
-  client.subscriptions = new Array();
-  
-  client.on('message', function(data) {
-    
+  socket.subscriptions = new Array();
+
+  socket.on('message', function(data) {
+
     // Make sure this is a valid request, if so, parse it
     // We expect it to look a little something like subscribe:tags:nofilter
-    
+
     if(data.split(':').length==3) {
 
       // Parse message
@@ -23,31 +23,31 @@ socket.on('connection', function(client){
       channel = message[0];
       method = message[1];
       value = message[2];
-    
+
       if(method=='subscribe') {
-        
+
         // Subscribe to a channel
-        client.subscriptions['channel:'+channel+':'+value] = true;
-        
+        socket.subscriptions['channel:'+channel+':'+value] = true;
+
       } else if(method=='search') {
-        
+
         // Tag Search
         var update = { 'type': 'searchResults' };
         helpers.instagram.tags.search({q:value,
           complete: function(data) {
             update.results = data;
-            client.send(JSON.stringify(update));
+            socket.send(JSON.stringify(update));
           },
           error: function(errorMessage) {
             update.message = errorMessage
-            client.send(JSON.stringify(update));
+            socket.send(JSON.stringify(update));
           }
         });
-        
+
       }
-      
+
     } else {
-      client.send('Pardon?');
+      socket.send('Pardon?');
     }
 
   });
@@ -65,14 +65,14 @@ r.on('pmessage', function(pattern, channel, message){
   if(pattern == subscriptionPattern){
 
     var data = JSON.parse(message);
-    
+
     console.log('New pictars: '+channel);
 
     // Send out update to subscribers. Client is expected to listen for 'newMedia' event
     var update = { 'type': 'newMedia', 'media': data, 'channel': channel };
-    for(sessionId in socket.clients) {
-      if(socket.clients[sessionId].subscriptions[channel]) {
-        socket.clients[sessionId].send(JSON.stringify(update));
+    for(id in io.sockets.sockets) {
+      if(io.sockets.sockets[id].subscriptions[channel]) {
+        io.sockets.sockets[id].send(JSON.stringify(update));
       }
     }
 

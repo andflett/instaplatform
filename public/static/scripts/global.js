@@ -6,20 +6,12 @@
 */
 
 // Open a socket
-var socket = new io.Socket();
-socket.connect();
-
+var PUBSUB_SERVER = 'http://instaplatform.mxmdev.com'
+var socket = io.connect(PUBSUB_SERVER);
 
 // Init event listeners for any newMedia messages across the socket
 var Media = {
   onNewMedia: function(ev) {
-    
-    if($('#weather').length!=0) {
-      var available_tags = new Array();
-      var weather_tags = new Array('sky','sun','cloud','rain','ice','snow','weather');
-      var weather_terms = new Array(' sky ',' sun',' cloud',' rain',' ice',' snow', 'weather');
-    }
-    
     $('.first').removeClass('first');
     $('#primary-content p.help').after('<ul class="append-live-data first" data-subscription="'+ev.channel+'"></ul>');
     $('.first').hide();

@@ -1,3 +1,5 @@
+Note: Socket.io, as of v.0.7, supports native Channels. I suspect it'd be far more efficient to utilise these at some point in the future.
+
 # Introduction
 
 This is intended as a platform to allow for the rapid development Instagram-fed real-time web applications. 

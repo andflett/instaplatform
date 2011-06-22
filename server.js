@@ -58,6 +58,8 @@ app.post('/callbacks', function(request, response){
   var calculatedSignature = hmac.digest(encoding='hex');
   if((providedSignature != calculatedSignature) || !request.body) response.send('FAIL');
   
+  // May need a timeout on this, the update can occasionally
+  // come before the image is available to the static API
   helpers.processUpdates(request.body);
   
 });
@@ -114,18 +116,20 @@ app.get('/channel/:channel/:value', function(request, response){
     // are not user specific
     var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
     r.hget('authenticated_users', username,function(error,user){
-      user_data = JSON.parse(user);
-      helpers.instagram.users.recent({ 
-        user_id: user_data.user.id, 
-        access_token: user_data.access_token,
-        complete: function(data,pagination) {
-        	response.render('channels/users', { locals: { media: data, user: user_data.user } });
-        },
-        error: function(errorMessage, errorObject, caller) {
-          console.log(errorMessage);
-          response.render('channels/users', { locals: { media: new Array(), user: user_data.user } });        
-        }
-      });
+      if(error==null) {
+        user_data = JSON.parse(user);
+        helpers.instagram.users.recent({ 
+          user_id: user_data.user.id, 
+          access_token: user_data.access_token,
+          complete: function(data,pagination) {
+          	response.render('channels/users', { locals: { media: data, user: user_data.user } });
+          },
+          error: function(errorMessage, errorObject, caller) {
+            console.log(errorMessage);
+            response.render('channels/users', { locals: { media: new Array(), user: user_data.user } });        
+          }
+        });
+      }
     });
     r.quit();
           
@@ -185,7 +189,6 @@ app.get('/channel/:channel/:value', function(request, response){
   }
   
 });
-
 
 /*
   Very experimental, mashing streams

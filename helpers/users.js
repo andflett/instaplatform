@@ -14,18 +14,20 @@ function processUpdate(userId){
   
   var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
   r.hget('authenticated_users_ids', userId, function(error,user){
-    user_data = JSON.parse(user);
-    helpers.instagram.users.recent({ 
-      user_id: user_data.user.id, 
-      access_token: user_data.access_token,
-      count: 1,
-      complete: function(data,pagination) {
-        r.publish('channel:users:' + user_data.user.username, JSON.stringify(data));
-      },
-      error: function(errorMessage, errorObject, caller) {
-        response.render('error', { locals: { error: errorMessage } });
-      }
-    });
+    if(error == null) { 
+      user_data = JSON.parse(user);
+      helpers.instagram.users.recent({ 
+        user_id: user_data.user.id, 
+        access_token: user_data.access_token,
+        count: 1,
+        complete: function(data,pagination) {
+          r.publish('channel:users:' + user_data.user.username, JSON.stringify(data));
+        },
+        error: function(errorMessage, errorObject, caller) {
+          response.render('error', { locals: { error: errorMessage } });
+        }
+      });
+    }
   });
   r.quit();
   

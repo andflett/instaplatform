@@ -24,15 +24,9 @@
     
     matched_terms = new Array();
     
-    for(term in weather_terms) {
-      
-      console.log(term);
-      
-    }
-    
     for(index in media[i].tags) {
-      if(weather_tags.indexOf(media[i].tags[index].toLowerCase())!=-1) {
-        show.push(' #'+media[i].tags[index]);
+      if(weather_terms.indexOf(media[i].tags[index].toLowerCase())!=-1) {
+        matched_terms.push(' #'+media[i].tags[index]);
       }
     }
     
@@ -40,7 +34,7 @@
       for(j in weather_terms) {
         caption = media[i].caption.text.toLowerCase();
         if(caption.indexOf(weather_terms[j])!=-1) {
-          show.push(' '+weather_terms[j]);
+          matched_terms.push(' '+weather_terms[j]);
         }
       }
     }

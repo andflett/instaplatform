@@ -190,41 +190,6 @@ app.get('/channel/:channel/:value', function(request, response){
   
 });
 
-/*
-  Very experimental, mashing streams
-*/
-
-app.get('/weather/:geography', function(request, response){
-  
-    // This should be an instagram location id
-    geography = request.params.geography
-    tag = request.params.tag
-    channel = 'geography';
-    
-    // Grab recent photos for this geography
-    var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
-    r.get('channel:geographies:'+geography+':subscriptions',function(error,geography_data){
-      geography_data = JSON.parse(geography_data);
-      
-      helpers.instagram.media.search({ 
-        lat: geography_data.lat,
-        lng: geography_data.lng,
-        distance: geography_data.radius,
-        count: 1000,
-        complete: function(data,pagination) {
-          helpers.setMinID('channel:'+channel+':'+geography, data, false);
-        	response.render('channels/weather', { locals: { media: data, geography: geography_data } });
-        },
-        error: function(errorMessage, errorObject, caller) {
-          response.render('channels/weather', { locals: { media: new Array(), geography: geography_data } });
-        }
-      });
-      
-    });
-    r.quit();
-    
-});
-
 // Location based requests are a little more complicated
 // and generally need lat-lngs or search terms translated
 // into either instagram 'locations' (based on 4sq) or 
@@ -287,10 +252,8 @@ app.post('/channel/:channel/', function(request,response) {
 });
 
 /* 
-  
-  Demo/homepage utilities
-  
-*/
+ * Demo/homepage utilities
+ */
 
 // Clear all subscriptions from redis and Instagram
 
@@ -311,4 +274,97 @@ app.get('/user/delete/:username', function(request,response){
   response.render('confirmation');
 });
 
+/*
+ * Very experimental, mashing streams
+ */
+
+app.get('/weather/:geography', function(request, response){
+  
+    // This should be an instagram location id
+    geography = request.params.geography
+    tag = request.params.tag
+    channel = 'geography';
+    
+    // Grab recent photos for this geography
+    var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+    r.get('channel:geographies:'+geography+':subscriptions',function(error,geography_data){
+      geography_data = JSON.parse(geography_data);
+      
+      helpers.instagram.media.search({ 
+        lat: geography_data.lat,
+        lng: geography_data.lng,
+        distance: geography_data.radius,
+        count: 1000,
+        complete: function(data,pagination) {
+          helpers.setMinID('channel:'+channel+':'+geography, data, false);
+        	response.render('channels/weather', { locals: { media: data, geography: geography_data } });
+        },
+        error: function(errorMessage, errorObject, caller) {
+          response.render('channels/weather', { locals: { media: new Array(), geography: geography_data } });
+        }
+      });
+      
+    });
+    r.quit();
+    
+});
+
+/* Experimental: A user group */
+
+var madebymany = [
+    'scandaloust',
+    'malbonster',
+    'stueccles',
+    'juxtapozed',
+    'crashtherocks',
+    'saradotdub',
+    'ninjabiscuit5',
+    'conordelahunty',
+    'ohrworm',
+    'sprinzette'
+];
+
+app.get('/channel/madebymany', function(request, response){
+  
+  var users = [];
+  var media = [];
+  
+  for(i=0;i<madebymany.length;i++) {
+    var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+    r.hget('authenticated_users', username, function(error,user){
+      if(error==null) {
+        user_data = JSON.parse(user);
+        helpers.instagram.users.recent({ 
+          user_id: user_data.user.id, 
+          access_token: user_data.access_token,
+          complete: function(data,pagination) {
+            users.push(user_data.user);
+            media.push(data);
+            render();
+          },
+          error: function(errorMessage, errorObject, caller) {
+            console.log(errorMessage);
+            users.push(errorMessage);
+            render();
+          }
+        });
+      }
+    });
+    r.quit();
+  }
+  
+  function render() {
+    if(users.length==madebymany.length) {
+      console.log(media);
+      console.log(users);
+      response.render('channels/madebymany', { locals: { media: media } });
+    }
+  }
+
+});
+
+/* 
+ * Kick it all off
+ */
+ 
 app.listen(settings.appPort);

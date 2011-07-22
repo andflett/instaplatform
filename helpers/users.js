@@ -21,6 +21,11 @@ function processUpdate(userId){
         access_token: user_data.access_token,
         count: 1,
         complete: function(data,pagination) {
+          for(i in settings.groups) {
+            if(settings.groups[i][user_data.user.username]!=undefined){
+              r.publish('channel:groups:' + settings.groups[i], JSON.stringify(data));
+            }
+          }
           r.publish('channel:users:' + user_data.user.username, JSON.stringify(data));
         },
         error: function(errorMessage, errorObject, caller) {

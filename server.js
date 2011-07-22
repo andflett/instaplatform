@@ -178,7 +178,45 @@ app.get('/channel/:channel/:value', function(request, response){
       });
     });
     r.quit();
+    
+  } else if(channel=="groups") {
+    
+    var fetchedUsers = 0;
+    var media = [];
+    group = settings.groups[value];
 
+    for(i=0;i<group.length;i++) {
+      var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+      r.hget('authenticated_users', group[i], function(error,user){
+        if(error==null && user!=null) {
+          user_data = JSON.parse(user);
+          helpers.instagram.users.recent({ 
+            user_id: user_data.user.id, 
+            access_token: user_data.access_token,
+            complete: function(data,pagination) {
+              fetchedUsers++;
+              media = media.concat(data);
+              render();
+            },
+            error: function(errorMessage, errorObject, caller) {
+              fetchedUsers++;
+              render();
+            }
+          });
+        } else {
+          fetchedUsers++;
+          render();
+        }
+      });
+      r.quit();
+    }
+    
+    function render() {
+      if(fetchedUsers==madebymany.length) {
+        response.render('channels/groups', { locals: { media: media, group: value } });
+      }
+    }
+    
   } else {
     
     // Unrecognised channel
@@ -242,7 +280,7 @@ app.post('/channel/:channel/', function(request,response) {
         response.redirect('/weather/'+data.object_id)
       });
     });
-    
+
   } else {
     response.render('error', { 
       locals: { error: 'Pardon?' } 
@@ -307,63 +345,6 @@ app.get('/weather/:geography', function(request, response){
     });
     r.quit();
     
-});
-
-/* Experimental: A user group */
-
-var madebymany = [
-    'scandaloust',
-    'malbonster',
-    'stueccles',
-    'juxtapozed',
-    'crashtherocks',
-    'saradotdub',
-    'ninjabiscuit5',
-    'conordelahunty',
-    'ohrworm',
-    'sprinzette',
-    'andrewsenter'
-];
-
-app.get('/channel/madebymany', function(request, response){
-  
-  var users = [];
-  var media = [];
-  
-  for(i=0;i<madebymany.length;i++) {
-    var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
-    r.hget('authenticated_users', madebymany[i], function(error,user){
-      if(error==null && user!=null) {
-        user_data = JSON.parse(user);
-        helpers.instagram.users.recent({ 
-          user_id: user_data.user.id, 
-          access_token: user_data.access_token,
-          complete: function(data,pagination) {
-            users.push(user_data.user);
-            media.concat(data);
-            render();
-          },
-          error: function(errorMessage, errorObject, caller) {
-            console.log(errorMessage);
-            users.push(errorMessage);
-            render();
-          }
-        });
-      } else {
-        users.push('error on '+madebymany[i]);
-        render();
-      }
-    });
-    r.quit();
-  }
-  
-  function render() {
-    if(users.length==madebymany.length) {
-      console.log(media);
-      response.render('channels/madebymany', { locals: { users: users, media: media } });
-    }
-  }
-
 });
 
 /* 

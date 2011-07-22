@@ -23,6 +23,8 @@ function processUpdate(userId){
         complete: function(data,pagination) {
           for(i in settings.groups) {
             if(settings.groups[i][user_data.user.username]!=undefined){
+              console.log('Broadcasting:');
+              console.log(settings.groups[i]);
               r.publish('channel:groups:' + settings.groups[i], JSON.stringify(data));
             }
           }

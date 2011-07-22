@@ -123,6 +123,16 @@ body {
   .home section#primary-content {
     width: 770px;
   }
+  
+  body.groups {
+    background: #222;
+    padding-top: 20px;
+  }
+  
+  .groups section#primary-content {
+    background: transparent;
+    width: 100%;
+  }
 
   section#primary-content section.channel {
     width: 220px;
@@ -179,6 +189,10 @@ body {
     border-radius: 15px;
     -moz-border-radius: 15px;
     -webkit-border-radius: 15px;
+  }
+  
+  .groups .append-live-data li img {
+    width: 90%;
   }
 
 /* Forms */

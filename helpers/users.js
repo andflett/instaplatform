@@ -12,7 +12,6 @@ function processUpdate(userId){
   // user hasn't managed to post more than one in the time
   // it's taken us to process the update
   
-  var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
   r.hget('authenticated_users_ids', userId, function(error,user){
     if(error == null) { 
       user_data = JSON.parse(user);
@@ -22,13 +21,16 @@ function processUpdate(userId){
         count: 1,
         complete: function(data,pagination) {
           for(i in settings.groups) {
-            if(settings.groups[i][user_data.user.username]!=undefined){
-              console.log('Broadcasting:');
-              console.log(settings.groups[i]);
-              r.publish('channel:groups:' + settings.groups[i], JSON.stringify(data));
+            if(settings.groups[i].indexOf(user_data.user.username])>0){
+              console.log('Broadcasting: '+'channel:groups:' + i);
+              var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
+              r.publish('channel:groups:' + i, JSON.stringify(data));
+              r.quit();
             }
           }
+          var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
           r.publish('channel:users:' + user_data.user.username, JSON.stringify(data));
+          r.quit();
         },
         error: function(errorMessage, errorObject, caller) {
           response.render('error', { locals: { error: errorMessage } });
@@ -36,7 +38,7 @@ function processUpdate(userId){
       });
     }
   });
-  r.quit();
+  
   
 }
 exports.processUpdate = processUpdate;

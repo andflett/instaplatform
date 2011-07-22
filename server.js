@@ -212,7 +212,7 @@ app.get('/channel/:channel/:value', function(request, response){
     }
     
     function render() {
-      if(fetchedUsers==madebymany.length) {
+      if(fetchedUsers==group.length) {
         response.render('channels/groups', { layout: 'clean', locals: { media: media, group: value } });
       }
     }

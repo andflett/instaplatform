@@ -213,6 +213,7 @@ app.get('/channel/:channel/:value', function(request, response){
     
     function render() {
       if(fetchedUsers==group.length) {
+        console.log(media);
         response.render('channels/groups', { layout: 'clean', locals: { media: media, group: value } });
       }
     }

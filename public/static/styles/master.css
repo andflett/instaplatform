@@ -126,12 +126,15 @@ body {
   
   body.groups {
     background: #222;
-    padding-top: 20px;
   }
   
-  .groups section#primary-content {
+  .groups div#platform section#primary-content {
     background: transparent;
     width: 100%;
+    box-shadow: 0 0 0 #fff;
+    -moz-box-shadow: 0 0 0 #fff;
+    -webkit-box-shadow: 0 0 0 #fff;
+    padding: 0;
   }
 
   section#primary-content section.channel {
@@ -191,8 +194,10 @@ body {
     -webkit-border-radius: 15px;
   }
   
+  .groups .append-live-data li { height: auto; }
   .groups .append-live-data li img {
     width: 90%;
+    margin: 0 auto;
   }
 
 /* Forms */

@@ -11,7 +11,7 @@ function processUpdate(userId){
   // Only render the most recent image, assuming that the
   // user hasn't managed to post more than one in the time
   // it's taken us to process the update
-  
+  var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
   r.hget('authenticated_users_ids', userId, function(error,user){
     if(error == null) { 
       user_data = JSON.parse(user);
@@ -21,8 +21,7 @@ function processUpdate(userId){
         count: 1,
         complete: function(data,pagination) {
           for(i in settings.groups) {
-            if(settings.groups[i].indexOf(user_data.user.username])>0){
-              console.log('Broadcasting: '+'channel:groups:' + i);
+            if(settings.groups[i].indexOf(user_data.user.username)>0){
               var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
               r.publish('channel:groups:' + i, JSON.stringify(data));
               r.quit();
@@ -38,7 +37,7 @@ function processUpdate(userId){
       });
     }
   });
-  
+  r.quit();
   
 }
 exports.processUpdate = processUpdate;

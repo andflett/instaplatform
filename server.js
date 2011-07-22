@@ -321,7 +321,8 @@ var madebymany = [
     'ninjabiscuit5',
     'conordelahunty',
     'ohrworm',
-    'sprinzette'
+    'sprinzette',
+    'andrewsenter'
 ];
 
 app.get('/channel/madebymany', function(request, response){
@@ -331,15 +332,15 @@ app.get('/channel/madebymany', function(request, response){
   
   for(i=0;i<madebymany.length;i++) {
     var r = redis.createClient(settings.REDIS_PORT,settings.REDIS_HOST);
-    r.hget('authenticated_users', username, function(error,user){
-      if(error==null) {
+    r.hget('authenticated_users', madebymany[i], function(error,user){
+      if(error==null && user!=null) {
         user_data = JSON.parse(user);
         helpers.instagram.users.recent({ 
           user_id: user_data.user.id, 
           access_token: user_data.access_token,
           complete: function(data,pagination) {
             users.push(user_data.user);
-            media.push(data);
+            media.concat(data);
             render();
           },
           error: function(errorMessage, errorObject, caller) {
@@ -348,6 +349,9 @@ app.get('/channel/madebymany', function(request, response){
             render();
           }
         });
+      } else {
+        users.push('error on '+madebymany[i]);
+        render();
       }
     });
     r.quit();
@@ -356,8 +360,7 @@ app.get('/channel/madebymany', function(request, response){
   function render() {
     if(users.length==madebymany.length) {
       console.log(media);
-      console.log(users);
-      response.render('channels/madebymany', { locals: { media: media } });
+      response.render('channels/madebymany', { locals: { users: users, media: media } });
     }
   }
 

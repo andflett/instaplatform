@@ -1,5 +1,10 @@
-<ul class="append-live-data" data-subscription="channel:users:<%= user.username %>">
+<ul class="append-live-data" <% for(user in users) { %><%= ' data-subscription="channel:users:'+user.username+'"' %><% } %>>
 <% for(var i=0; i<media.length; i++) { %>
   <li id="media-<%= media[i].id %>"><a href="<%= media[i].link %>"><img src="<%= media[i].images.standard_resolution.url %>" /></a></li>
 <% } %>
 </ul>
+<script>
+  $(document).ready(function(){
+    <% for(user in users) { %><%= socket.send('users:subscribe:'+user.username); %><% } %>
+  });
+</script>

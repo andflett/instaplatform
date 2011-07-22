@@ -74,6 +74,10 @@ body {
   	width: 800px;
   }
   
+  div#platform.groups {
+    width: 100%;
+  }
+  
   header { 
     padding: 20px 0 25px;
   }
@@ -131,9 +135,9 @@ body {
   .groups div#platform section#primary-content {
     background: transparent;
     width: 100%;
-    box-shadow: 0 0 0 #fff;
-    -moz-box-shadow: 0 0 0 #fff;
-    -webkit-box-shadow: 0 0 0 #fff;
+    box-shadow: 0 0 0 #222;
+    -moz-box-shadow: 0 0 0 #222;
+    -webkit-box-shadow: 0 0 0 #222;
     padding: 0;
   }
 
@@ -194,9 +198,9 @@ body {
     -webkit-border-radius: 15px;
   }
   
-  .groups .append-live-data li { height: auto; }
+  .groups .append-live-data li { height: 1000px; }
   .groups .append-live-data li img {
-    width: 90%;
+    height: 1000px;
     margin: 0 auto;
   }
 

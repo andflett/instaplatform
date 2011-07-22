@@ -213,8 +213,16 @@ app.get('/channel/:channel/:value', function(request, response){
     
     function render() {
       if(fetchedUsers==group.length) {
-        console.log(media);
-        response.render('channels/groups', { layout: 'clean', locals: { media: media, group: value } });
+        
+        // console.log(media);
+        sorted_media = [];
+        for(i in media) {
+          sorted_media[parseInt(media[i].created_time)] = media[i];
+        }
+        sorted_media.sort(function(a,b){return a - b});
+        console.log(sorted_media);
+        
+        response.render('channels/groups', { layout: 'clean', locals: { media: sorted_media, group: value } });
       }
     }
     

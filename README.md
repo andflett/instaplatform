@@ -4,7 +4,7 @@ Note: Socket.io, as of v.0.7, supports native Channels. I suspect it'd be far mo
 
 This is intended as a platform to allow for the rapid development Instagram-fed real-time web applications. 
 
-See my <a href="http://madebymany.com/blog/a-picture-is-worth-140-characters">blog post</a> for some background on this project, or the <a href="http://instaplatform.mxmdev.com/">demo</a> site.
+See my <a href="http://madebymany.com/blog/a-picture-is-worth-140-characters">blog post</a> for some background on the project.
 
 ## What does what
 

@@ -1,6 +1,6 @@
 <p class="help"></p>  
 <ul class="append-live-data" data-subscription="channel:groups:madebymany">
-<% for(var i=0; i<media.length; i++) { %>
+<% for(for i in media) { if(media[i]!=undefined) { %>
   <li id="media-<%= media[i].id %>"><a href="<%= media[i].link %>"><img src="<%= media[i].images.standard_resolution.url %>" /></a></li>
-<% } %>
+<% } } %>
 </ul>

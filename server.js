@@ -193,6 +193,7 @@ app.get('/channel/:channel/:value', function(request, response){
           helpers.instagram.users.recent({ 
             user_id: user_data.user.id, 
             access_token: user_data.access_token,
+            count: 5,
             complete: function(data,pagination) {
               fetchedUsers++;
               media = media.concat(data);
@@ -213,16 +214,8 @@ app.get('/channel/:channel/:value', function(request, response){
     
     function render() {
       if(fetchedUsers==group.length) {
-        
-        // console.log(media);
-        sorted_media = [];
-        for(i in media) {
-          sorted_media[parseInt(media[i].created_time)] = media[i];
-        }
-        sorted_media.sort(function(a,b){return a - b});
-        console.log(sorted_media);
-        
-        response.render('channels/groups', { layout: 'clean', locals: { media: sorted_media, group: value } });
+        media.sort(function(a,b){return b.created_time - a.created_time});
+        response.render('channels/groups', { layout: 'clean', locals: { media: media, group: value } });
       }
     }
     

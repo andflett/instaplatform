@@ -109,24 +109,24 @@ locationUI.prototype.getPlaces = function(errorNotice) {
     		    placeSelector = $('<ol class="location-places"></ol>');
                 for (var i=0;i<places.length;i++) {
 	
-					full_address = Array();
-                    if(places[i].location.address) full_address.push(places[i].location.address);
-					if(places[i].location.crossStreet) full_address.push(places[i].location.crossStreet);
-                  	if(places[i].location.city) full_address.push(places[i].location.city);
-                    if(places[i].location.state) full_address.push(places[i].location.state);
-					address = full_address.join(', ');
+                  full_address = Array();
+                  if(places[i].location.address) full_address.push(places[i].location.address);
+                  if(places[i].location.crossStreet) full_address.push(places[i].location.crossStreet);
+                  if(places[i].location.city) full_address.push(places[i].location.city);
+                  if(places[i].location.state) full_address.push(places[i].location.state);
+                  address = full_address.join(', ');
     		        
-					place = $('<li data-latitude="'+places[i].location.lat+'" data-name="'+places[i].name+'" data-address="'+address+'" data-longitude="'+places[i].location.lng+'" data-id="'+places[i].id+'">'+places[i].name+'</li>');
+					        place = $('<li data-latitude="'+places[i].location.lat+'" data-name="'+places[i].name+'" data-address="'+address+'" data-longitude="'+places[i].location.lng+'" data-id="'+places[i].id+'">'+places[i].name+'</li>');
     		        if(locationInterface.place_id == places[i].id) place.addClass('active');
 
-					place.click(function(){
-    		            locationInterface.latitude = $(this).attr('data-latitude');
-    	                locationInterface.longitude = $(this).attr('data-longitude');
-    	                locationInterface.place_id = $(this).attr('data-id');
-    	                locationInterface.place_name = $(this).attr('data-name');
-						locationInterface.place_address = $(this).attr('data-address');
-						$(this).siblings().removeClass('active');
-						$(this).addClass('active');
+					          place.click(function(){
+              		            locationInterface.latitude = $(this).attr('data-latitude');
+              	                locationInterface.longitude = $(this).attr('data-longitude');
+              	                locationInterface.place_id = $(this).attr('data-id');
+              	                locationInterface.place_name = $(this).attr('data-name');
+          						locationInterface.place_address = $(this).attr('data-address');
+          						$(this).siblings().removeClass('active');
+          						$(this).addClass('active');
                         locationInterface.updateLocation(true);
                     }); 
 

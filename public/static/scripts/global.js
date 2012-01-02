@@ -84,11 +84,13 @@ $(document).ready(function(){
     return false;
   });
   
+  if($('.groups').length<1) {
   navigator.geolocation.getCurrentPosition(function(position) {
     $('#lat').val(position.coords.latitude);
     $('#lng').val(position.coords.longitude);
     $('#radius').val(position.coords.accuracy);
   });
+}
 
 });
 
